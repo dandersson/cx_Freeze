@@ -163,7 +163,9 @@ class Freezer(object):
                 product = self.metadata.name,
                 copyright = exe.copyright,
                 trademarks = exe.trademarks)
-        stamp(fileName, versionInfo)
+        # Same issues as for AddIcon within _FreezeExecutable.
+        # stamp(fileName, versionInfo)
+        stamp(os.path.abspath(fileName), versionInfo)
 
     def _CopyFile(self, source, target, copyDependentFiles,
             includeMode = False):
@@ -211,7 +213,10 @@ class Freezer(object):
         if exe.icon is not None:
             if sys.platform == "win32":
                 import cx_Freeze.util
-                cx_Freeze.util.AddIcon(exe.targetName, exe.icon)
+                # For some reason, this fails on Windows Server 2012 when run through Jenkins. By sending an absolute
+                # path into the AddIcon function, it works. Go figure.
+                # cx_Freeze.util.AddIcon(exe.targetName, exe.icon)
+                cx_Freeze.util.AddIcon(os.path.abspath(exe.targetName), exe.icon)
             else:
                 targetName = os.path.join(os.path.dirname(exe.targetName),
                         os.path.basename(exe.icon))
